@@ -1,11 +1,13 @@
 use std::fmt::Write;
 use core::ops::Add;
-use std::{vec, write, println};
+use std::vec;
 
 use macroquad::prelude::*;
 
 // macroquad default window width and height is 800 and 600;
 const BLOCK_SIZE: f32 = 20.0;
+const GRID_X: i32 = 40;
+const GRID_Y: i32 = 30;
 
 #[derive(Clone, Copy)]
 struct Point(i32, i32);
@@ -74,6 +76,10 @@ impl Game {
         for block in &self.snake_position {
             draw_blocks(&block, GREEN);
         }
+        let Point(mut snake_x, mut snake_y) = self.snake_position.first().unwrap();
+        if snake_x > GRID_X {
+            snake_x = 0;
+        }
     }
 
     fn draw_food(&mut self) {
@@ -102,7 +108,7 @@ impl Game {
 
     fn handle_event(&mut self) {
         if is_key_down(KeyCode::O) {
-            self.move_left();
+        self.direction = Direction::Left;
         }
         if is_key_down(KeyCode::U) {
             self.move_right();
@@ -138,7 +144,7 @@ impl Game {
 
     fn generate_food(&mut self) {
         if self.ate_food() {
-            self.food_position = Point(rand::gen_range(0, 40), rand::gen_range(0, 30));
+            self.food_position = Point(rand::gen_range(0, GRID_X), rand::gen_range(0, GRID_Y));
             self.score += 1;
         }
     }
@@ -182,7 +188,7 @@ fn draw_blocks(point: &Point, color: Color) {
     );
 }
 
-fn print_screen_info() {
+fn _print_screen_info() {
     println!("screen width: {}", screen_width());
     println!("screen height: {}", screen_height());
 }
