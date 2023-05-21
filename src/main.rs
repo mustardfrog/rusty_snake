@@ -1,5 +1,6 @@
+use std::fmt::Write;
 use core::ops::Add;
-use std::vec;
+use std::{vec, write, println};
 
 use macroquad::prelude::*;
 
@@ -7,7 +8,7 @@ use macroquad::prelude::*;
 const BLOCK_SIZE: f32 = 20.0;
 
 #[derive(Clone, Copy)]
-struct Point(i8, i8);
+struct Point(i32, i32);
 
 impl Add<Point> for Point {
     type Output = Point;
@@ -35,6 +36,7 @@ struct Game {
     direction: Direction,
     food_position: Point,
     state: GameState,
+    score: u32,
 }
 
 impl Game {
@@ -44,6 +46,7 @@ impl Game {
             direction: Direction::Right,
             food_position: Point(5, 5),
             state: (GameState::Playing),
+            score: 0,
         }
     }
 
@@ -92,13 +95,12 @@ impl Game {
 
     fn toggle_pause(&mut self) {
         self.state = match self.state {
-            GameState::Paused => GameState::Playing,
             GameState::Playing => GameState::Paused,
+            GameState::Paused => GameState::Playing,
         }
     }
 
     fn handle_event(&mut self) {
-
         if is_key_down(KeyCode::O) {
             self.move_left();
         }
@@ -117,6 +119,7 @@ impl Game {
     }
 
     fn render(&mut self) {
+        self.generate_food();
         self.draw_snake();
         self.draw_food();
         self.handle_event();
@@ -125,26 +128,47 @@ impl Game {
             draw_text("Paused", 400.0, 300.0, 40.0, RED);
         }
     }
+
+    fn ate_food(&self) -> bool {
+        let Point(snake_x, snake_y) = self.snake_position.first().unwrap();
+        let Point(food_x, food_y) = self.food_position;
+
+        return *snake_x == food_x && *snake_y == food_y;
+    }
+
+    fn generate_food(&mut self) {
+        if self.ate_food() {
+            self.food_position = Point(rand::gen_range(0, 40), rand::gen_range(0, 30));
+            self.score += 1;
+        }
+    }
 }
 
 #[macroquad::main("hello")]
 async fn main() {
+
     let mut game = Game::new();
 
     let mut frame_counter = 0;
 
     loop {
-        game.render();
 
+        game.render();
         frame_counter += 1;
 
         if frame_counter % 5 == 0 {
             game.next_tick();
             frame_counter = 0;
         }
-
+        display_score(&game);
         next_frame().await
     }
+}
+
+fn display_score(game: &Game) {
+    let mut s = String::new();
+    write!(s, "Score: {}", game.score);
+    draw_text(&s, 300.0, 30.0, 30.0, GREEN);
 }
 
 fn draw_blocks(point: &Point, color: Color) {
