@@ -1,5 +1,5 @@
-use std::fmt::Write;
 use core::ops::Add;
+use std::fmt::Write;
 use std::vec;
 
 use macroquad::prelude::*;
@@ -86,19 +86,6 @@ impl Game {
         draw_blocks(&self.food_position, RED);
     }
 
-    fn move_left(&mut self) {
-        self.direction = Direction::Left;
-    }
-    fn move_right(&mut self) {
-        self.direction = Direction::Right;
-    }
-    fn move_up(&mut self) {
-        self.direction = Direction::Up;
-    }
-    fn move_down(&mut self) {
-        self.direction = Direction::Down;
-    }
-
     fn toggle_pause(&mut self) {
         self.state = match self.state {
             GameState::Playing => GameState::Paused,
@@ -108,16 +95,16 @@ impl Game {
 
     fn handle_event(&mut self) {
         if is_key_down(KeyCode::O) {
-        self.direction = Direction::Left;
+            self.direction = Direction::Left;
         }
         if is_key_down(KeyCode::U) {
-            self.move_right();
+            self.direction = Direction::Right;
         }
         if is_key_down(KeyCode::E) {
-            self.move_down();
+            self.direction = Direction::Down;
         }
         if is_key_down(KeyCode::Period) {
-            self.move_up();
+            self.direction = Direction::Up;
         }
         if is_key_down(KeyCode::Space) {
             self.toggle_pause();
@@ -150,27 +137,6 @@ impl Game {
     }
 }
 
-#[macroquad::main("hello")]
-async fn main() {
-
-    let mut game = Game::new();
-
-    let mut frame_counter = 0;
-
-    loop {
-
-        game.render();
-        frame_counter += 1;
-
-        if frame_counter % 5 == 0 {
-            game.next_tick();
-            frame_counter = 0;
-        }
-        display_score(&game);
-        next_frame().await
-    }
-}
-
 fn display_score(game: &Game) {
     let mut s = String::new();
     write!(s, "Score: {}", game.score);
@@ -192,3 +158,23 @@ fn _print_screen_info() {
     println!("screen width: {}", screen_width());
     println!("screen height: {}", screen_height());
 }
+
+#[macroquad::main("hello")]
+async fn main() {
+    let mut game = Game::new();
+
+    let mut frame_counter = 0;
+
+    loop {
+        game.render();
+        frame_counter += 1;
+
+        if frame_counter % 5 == 0 {
+            game.next_tick();
+            frame_counter = 0;
+        }
+        display_score(&game);
+        next_frame().await
+    }
+}
+
