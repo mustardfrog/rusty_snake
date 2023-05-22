@@ -76,10 +76,6 @@ impl Game {
         for block in &self.snake_position {
             draw_blocks(&block, GREEN);
         }
-        let Point(mut snake_x, mut snake_y) = self.snake_position.first().unwrap();
-        if snake_x > GRID_X {
-            snake_x = 0;
-        }
     }
 
     fn draw_food(&mut self) {
@@ -122,6 +118,15 @@ impl Game {
         }
     }
 
+    fn update_snake(&mut self) {
+        let tail = self.snake_position.last().unwrap();
+
+        let Point(extra_x, extra_y) = tail;
+        self.snake_position.push(Point(extra_x - 1, *extra_y));
+
+        // self.snake_position.push(Point());
+    }
+
     fn ate_food(&self) -> bool {
         let Point(snake_x, snake_y) = self.snake_position.first().unwrap();
         let Point(food_x, food_y) = self.food_position;
@@ -133,6 +138,7 @@ impl Game {
         if self.ate_food() {
             self.food_position = Point(rand::gen_range(0, GRID_X), rand::gen_range(0, GRID_Y));
             self.score += 1;
+            self.update_snake();
         }
     }
 }
@@ -177,4 +183,3 @@ async fn main() {
         next_frame().await
     }
 }
-
